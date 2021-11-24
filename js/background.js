@@ -1,5 +1,7 @@
 //  全局提示 - 持久存储 - OK
-//    定时提示
+//    定时提示 - OK
+//      可以直接关闭 - OK
+//      可以延时提示 - OK
 //    提示类型
 //      - alert - OK
 //      - warning - OK
@@ -9,25 +11,25 @@
 const globalTips = [
   {
     id: 1,
-    triggerTime: `16:${window.xxx}`,
+    triggerTime: `17:45`,
     laterTime: '',
     text: '大佬，关禅道啦！',
     type: 'alert'
   },
-  {
-    id: 2,
-    triggerTime: `17:${window.xxx}`,
-    laterTime: '',
-    text: '大佬，关禅道啦！',
-    type: 'warning'
-  },
-  {
-    id: 3,
-    triggerTime: `17:${window.xxx}`,
-    laterTime: '',
-    text: '大佬，关禅道啦！',
-    type: 'tip'
-  },
+  // {
+  //   id: 2,
+  //   triggerTime: `17:${window.xxx}`,
+  //   laterTime: '',
+  //   text: '大佬，关禅道啦！',
+  //   type: 'warning'
+  // },
+  // {
+  //   id: 3,
+  //   triggerTime: `17:${window.xxx}`,
+  //   laterTime: '',
+  //   text: '大佬，关禅道啦！',
+  //   type: 'tip'
+  // },
 ]
 
 chrome.runtime.onInstalled.addListener(() => {
@@ -37,7 +39,6 @@ chrome.runtime.onInstalled.addListener(() => {
   })
   console.log('存储设置成功')
 })
-console.log(dayjs(new Date), 'ddd')
 
 const sendToTab = (message) => {
   chrome.tabs.query({}, function(tabs) {
@@ -47,11 +48,8 @@ const sendToTab = (message) => {
   });
 }
 
-// TODO 15 分钟
-const add15Min = (time) => {
-  const hour = parseInt(time.split(':')[0])
-  const min = parseInt(time.split(':')[1])
-  const date = dayjs().set('h', hour).set('m', min + 1)
+const add15Min = () => {
+  const date = dayjs(new Date()).add(1, 'm')
   return `${date.get('h')}:${date.get('m')}`
 }
 
@@ -59,7 +57,7 @@ const add15Min = (time) => {
 //  检查是否有到时的 tip，如果有发送到所有 tab
 //  tab 弹出弹窗
 //    当弹窗关闭时，通知 background 转发到所有 tab，所有 tab 关闭弹窗, 如有延时时间清除
-//    当弹窗延时时，通知 background 转发到所有 tab，所有 tab 关闭弹窗, 并修改延时时间
+//    当弹窗延时时，通知 background 转发到所有 tab，所有 tab 关闭弹窗, 并基于当前时间修改延时时间
 
 const runGlobalTips = () => {
   let globalTips = []
@@ -82,17 +80,15 @@ const runGlobalTips = () => {
     sendToTab({ msg: 'close global tip', value: {tip} }) // 转发到全部 Tab
   }
 
-  // TODO 增加的时刻
   const laterGlobalTip = (id) => {
     const tip = getGlobalTipById(id)
     closeGlobalTip(id)
-    tip.laterTime = add15Min(tip.laterTime || tip.triggerTime)
+    tip.laterTime = add15Min()
   }
 
 
   const checkTips = (time) => {
     globalTips.forEach((tip) => {
-      console.log(time, 'time', tip.triggerTime, tip.laterTime)
       if (time === tip.triggerTime || time === tip.laterTime) { // 触发提示
         openGlobalTip(tip)
       }

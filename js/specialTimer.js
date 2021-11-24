@@ -1,6 +1,4 @@
-window.xxx = 53
-const SPECIAL_TIME = [0, 15, 48, 49, 50, 51, 52, 53, 54, 55, 56,57]
-console.log(window.xxx, 'xxx')
+const SPECIAL_TIME = [0, 15, 30 ,45]
 
 // 通过秒计时器获取整分钟，通过分钟计时器获取特殊时间点，有效节省计时器对性能对消耗
 window.specialTime = (onTime) => {
